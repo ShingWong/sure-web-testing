@@ -218,37 +218,53 @@ Configure in `opencode.json`:
 Then prompt OpenCode with a step-by-step browser task:
 
 ```
-Using sure-web-testing, test the login flow at http://localhost:3000.
-1. Launch a headed browser
+Using sure-web-testing, debug the login flow at http://localhost:3000.
+Start recording video, then step through each action — inspect state
+between every step.
+
+1. Launch a headed browser with video recording enabled
 2. Go to http://localhost:3000/login
-3. Fill in email "test@example.com" and password "wrong"
-4. Click the submit button
-5. Take a screenshot with the error message highlighted
-6. Get the console logs
-7. Close the browser
+3. Get the DOM and verify the form elements exist
+4. Highlight the email input and take a screenshot to confirm selector
+5. Fill in email "test@example.com"
+6. Fill in password "wrong"
+7. Click the submit button
+8. Wait for the error message to appear
+9. Highlight the error element and screenshot it
+10. Get console logs to check for JS errors
+11. Get network requests to verify the API call and its response
+12. Stop the video and save the recording
+13. Close the browser
 ```
 
-OpenCode will execute each step via the MCP tools, pausing between steps so you can inspect state.
+OpenCode executes each step via the MCP tools, pausing between every action so you can inspect DOM, console, network, and screenshots before proceeding. This multi-step debugging loop — act, inspect, decide, act — is the core workflow.
 
 ### What OpenCode should know
 
 | File | What it tells the agent |
 |------|------------------------|
-| `src/browser.py` | `BrowserManager` class — session lifecycle, navigation, DOM, interaction, console/network capture |
+| `src/browser.py` | `BrowserManager` class — session lifecycle, navigation, DOM, interaction, console/network capture, video recording, element highlighting |
 | `src/tools.py` | `ToolRegistry` + `build_registry` — all 30+ MCP tools with signatures |
 | `src/vision.py` | `VisionProvider` hierarchy — Google, OpenAI, OpenRouter vision analysis |
 | `src/server.py` | `MCPServer` — JSON-RPC 2.0 protocol over stdin/stdout |
 | `src/cli.py` | Interactive REPL CLI |
 | `docs/vision-config.md` | Vision provider configuration and model pricing |
 
-### Example: AI-driven test workflow
+### Example: AI-driven multi-step debugging workflow
 
 1. Read `src/tools.py` → understand available browser tools
 2. Read `src/browser.py` → understand session model (launch once, step sequentially)
-3. Call `launch` → start browser
-4. Call `goto`, `fill`, `click`, etc. → interact with page
-5. Call `screenshot`, `get_console_logs` → verify state
-6. Call `close` → cleanup
+3. Call `launch` with `record_video=true` → start browser with video capture
+4. Call `goto` → navigate to target page
+5. Call `query_elements` or `get_dom` → verify page structure
+6. Call `highlight_element` + `screenshot` → visually confirm target components
+7. Call `fill`, `click`, `select_option` → interact with page
+8. Call `get_console_logs` → check for JS errors after each interaction
+9. Call `get_network_requests` → verify API calls and responses
+10. Call `screenshot` with `highlight` → capture visual evidence at key states
+11. Call `analyze_screenshot` → let vision AI inspect the page visually
+12. Call `stop_video` → save full session recording
+13. Call `close` → cleanup
 
 ## Development
 
