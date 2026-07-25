@@ -201,6 +201,55 @@ AI coding assistants (OpenCode, Claude Code, Cursor) can connect to the MCP serv
 
 Once connected, agents can launch a browser, navigate, inspect, and interact step-by-step — the browser stays alive between tool calls.
 
+### OpenCode Workflow Example
+
+Configure in `opencode.json`:
+
+```json
+{
+  "mcpServers": {
+    "sure-web-testing": {
+      "command": "awt-server"
+    }
+  }
+}
+```
+
+Then prompt OpenCode with a step-by-step browser task:
+
+```
+Using sure-web-testing, test the login flow at http://localhost:3000.
+1. Launch a headed browser
+2. Go to http://localhost:3000/login
+3. Fill in email "test@example.com" and password "wrong"
+4. Click the submit button
+5. Take a screenshot with the error message highlighted
+6. Get the console logs
+7. Close the browser
+```
+
+OpenCode will execute each step via the MCP tools, pausing between steps so you can inspect state.
+
+### What OpenCode should know
+
+| File | What it tells the agent |
+|------|------------------------|
+| `src/browser.py` | `BrowserManager` class — session lifecycle, navigation, DOM, interaction, console/network capture |
+| `src/tools.py` | `ToolRegistry` + `build_registry` — all 30+ MCP tools with signatures |
+| `src/vision.py` | `VisionProvider` hierarchy — Google, OpenAI, OpenRouter vision analysis |
+| `src/server.py` | `MCPServer` — JSON-RPC 2.0 protocol over stdin/stdout |
+| `src/cli.py` | Interactive REPL CLI |
+| `docs/vision-config.md` | Vision provider configuration and model pricing |
+
+### Example: AI-driven test workflow
+
+1. Read `src/tools.py` → understand available browser tools
+2. Read `src/browser.py` → understand session model (launch once, step sequentially)
+3. Call `launch` → start browser
+4. Call `goto`, `fill`, `click`, etc. → interact with page
+5. Call `screenshot`, `get_console_logs` → verify state
+6. Call `close` → cleanup
+
 ## Development
 
 ```bash
