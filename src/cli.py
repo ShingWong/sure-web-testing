@@ -1,6 +1,6 @@
 """src/cli.py — Interactive REPL CLI for step-by-step browser testing."""
 import shlex
-import sys
+
 from src.browser import BrowserManager
 
 

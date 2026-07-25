@@ -1,6 +1,6 @@
 """tests/test_tools.py"""
-from src.tools import ToolRegistry, build_registry
 from src.browser import BrowserManager
+from src.tools import ToolRegistry, build_registry
 
 
 def test_register_and_list():

@@ -1,5 +1,6 @@
 """src/tools.py — Tool registry and build_registry factory for MCP server."""
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
 
 class ToolRegistry:

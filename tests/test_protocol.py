@@ -1,7 +1,8 @@
 """tests/test_protocol.py"""
-import json
 import io
-from src.protocol import JSONRPCRequest, JSONRPCResponse, JSONRPCError, read_message, write_message
+import json
+
+from src.protocol import JSONRPCError, JSONRPCRequest, JSONRPCResponse, read_message, write_message
 
 
 def test_read_request():

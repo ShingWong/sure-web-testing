@@ -4,11 +4,9 @@ import json
 import os
 import tempfile
 import time
-from typing import Any
 from uuid import uuid4
 
-from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
-
+from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 
 DEFAULT_VIEWPORT = {"width": 1920, "height": 1080}
 
@@ -262,8 +260,9 @@ class BrowserManager:
     def _highlight_element(self, selector: str, color: str = "#ff8800"):
         self._clear_highlights()
         r_ch, g_ch, b_ch = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        escaped = selector.replace("'", "\\'")
         js = f"""(() => {{
-            const el = document.querySelector('{selector.replace("'", "\\'")}');
+            const el = document.querySelector('{escaped}');
             if (!el) return;
             const rect = el.getBoundingClientRect();
             let f = document.getElementById('awt-highlight');

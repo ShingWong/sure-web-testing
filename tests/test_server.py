@@ -1,6 +1,7 @@
 """tests/test_server.py"""
 import io
 import json
+
 from src.server import MCPServer
 from src.tools import ToolRegistry
 

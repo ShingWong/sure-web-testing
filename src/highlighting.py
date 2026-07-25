@@ -17,8 +17,9 @@ class HighlightManager:
 
     def highlight(self, selector: str, color: str = "#ff8800") -> dict:
         r_ch, g_ch, b_ch = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        escaped = selector.replace("'", "\\'")
         js = f"""(() => {{
-            const el = document.querySelector('{selector.replace("'", "\\'")}');
+            const el = document.querySelector('{escaped}');
             if (!el) return false;
             const box = el.getBoundingClientRect();
             let f = document.getElementById('{self._element_id}');

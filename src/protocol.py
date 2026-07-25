@@ -1,8 +1,8 @@
 """src/protocol.py — JSON-RPC 2.0 message types and stdin/stdout transport."""
 
-from dataclasses import dataclass, asdict
-from typing import Any
 import json
+from dataclasses import asdict, dataclass
+from typing import Any
 
 
 @dataclass

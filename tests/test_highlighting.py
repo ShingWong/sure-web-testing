@@ -1,5 +1,5 @@
 """tests/test_highlighting.py"""
-from src.highlighting import HighlightManager, HIGHLIGHT_STYLE
+from src.highlighting import HIGHLIGHT_STYLE
 
 
 def test_style_constants():
