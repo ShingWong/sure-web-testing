@@ -4,7 +4,7 @@ import sys
 import traceback
 from typing import Any
 
-from src.protocol import JSONRPCError, JSONRPCResponse, read_message, write_message
+from src.protocol import JSONRPCError, JSONRPCRequest, JSONRPCResponse, read_message, write_message
 from src.tools import ToolRegistry
 
 
@@ -16,7 +16,7 @@ class MCPServer:
         try:
             msg = read_message(stdin)
         except EOFError:
-            return
+            raise  # let run()'s outer handler exit the loop
         except Exception as e:
             err = JSONRPCError(id=None, code=-32700, message="Parse error", data=str(e))
             write_message(stdout, err)
@@ -27,6 +27,7 @@ class MCPServer:
             return
 
         req = msg
+        assert isinstance(req, JSONRPCRequest), f"Expected JSONRPCRequest, got {type(req)}"
 
         # Notifications (no id) — no response
         if req.id is None:

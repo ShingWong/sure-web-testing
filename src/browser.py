@@ -2,6 +2,7 @@
 import base64
 import json
 import os
+import re
 import tempfile
 import time
 from uuid import uuid4
@@ -110,6 +111,13 @@ class BrowserManager:
     def goto(self, url: str, wait_until: str = "networkidle") -> dict:
         try:
             self._ensure_session()
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            allowed = {"http", "https", "about", "data"}
+            if not os.environ.get("BLOCK_FILE_URL") and url.startswith("file://"):
+                allowed.add("file")
+            if parsed.scheme not in allowed:
+                return {"status": "error", "error": f"Blocked URL scheme: {parsed.scheme}. Allowed: {', '.join(sorted(allowed))}."}
             self._page.goto(url, wait_until=wait_until)
             return {"status": "ok", "data": {"url": self._page.url, "title": self._page.title()}}
         except Exception as e:
@@ -236,6 +244,8 @@ class BrowserManager:
     def evaluate(self, script: str) -> dict:
         try:
             self._ensure_session()
+            if not os.environ.get("ALLOW_EVALUATE"):
+                return {"status": "error", "error": "evaluate tool requires ALLOW_EVALUATE=true env var (dangerous: enables arbitrary JS execution)"}
             result = self._page.evaluate(script)
             return {"status": "ok", "data": {"result": result}}
         except Exception as e:
@@ -258,11 +268,13 @@ class BrowserManager:
             return {"status": "error", "error": str(e)}
 
     def _highlight_element(self, selector: str, color: str = "#ff8800"):
+        import json as _json
         self._clear_highlights()
+        if not re.match(r'^#[0-9a-fA-F]{6,8}$', color):
+            raise ValueError(f"Invalid color format: {color!r}. Expected #RRGGBB or #RRGGBBAA")
         r_ch, g_ch, b_ch = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-        escaped = selector.replace("'", "\\'")
         js = f"""(() => {{
-            const el = document.querySelector('{escaped}');
+            const el = document.querySelector({_json.dumps(selector)});
             if (!el) return;
             const rect = el.getBoundingClientRect();
             let f = document.getElementById('awt-highlight');
@@ -274,7 +286,7 @@ class BrowserManager:
             f.style.cssText = 'position:fixed;left:' + rect.x + 'px;top:' + rect.y + 'px;' +
                 'width:' + rect.width + 'px;height:' + rect.height + 'px;' +
                 'background:rgba({r_ch},{g_ch},{b_ch},0.20);' +
-                'border:3px solid {color};z-index:999999;' +
+                'border:3px solid ' + {_json.dumps(color)} + ';z-index:999999;' +
                 'pointer-events:none;border-radius:3px;' +
                 'box-shadow:0 0 12px rgba({r_ch},{g_ch},{b_ch},0.6)';
         }})()"""

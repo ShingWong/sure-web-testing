@@ -71,6 +71,70 @@ Agent/CLI ↔ stdin/stdout JSON-RPC 2.0 ↔ MCP Server ↔ Playwright ↔ Chromi
 | `get_console_logs` | Browser console messages |
 | `get_network_requests` | Network request log |
 
+### Vision Analysis (Provider-Agnostic)
+| Tool | Purpose |
+|------|---------|
+| `analyze_screenshot` | Take screenshot + analyze with vision AI in one call |
+| `analyze_image` | Analyze an existing image file with vision AI |
+
+Configure via environment variables:
+- `VISION_PROVIDER` — `"google"` (default), `"openai"`, or `"openrouter"`
+- `VISION_API_KEY` — API key for the chosen provider (or provider-specific: `GOOGLE_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`)
+- `VISION_MODEL` — Model override (default: provider-specific)
+- `VISION_BASE_URL` — Base URL override (for OpenAI-compatible providers only)
+
+Providers and their defaults:
+
+| Provider | Default Model | API Key Env Var | Base URL |
+|----------|--------------|----------------|----------|
+| `google` | `gemini-2.5-flash-lite` | `GOOGLE_API_KEY` | — |
+| `openai` | `gpt-4o` | `OPENAI_API_KEY` | `https://api.openai.com/v1` |
+| `openrouter` | `qwen/qwen3.6-plus` | `OPENROUTER_API_KEY` | `https://openrouter.ai/api/v1` |
+
+All OpenAI-compatible providers (`openai`, `openrouter`) use the same base class, so you can add any OpenAI-compatible API by setting `VISION_BASE_URL`. For example, to use a local vLLM server: `VISION_PROVIDER=openai VISION_BASE_URL=http://localhost:8000/v1`
+
+### Configuration Examples
+
+**Cheapest — Qwen via OpenRouter (~$0.05/1K images):**
+```bash
+export VISION_PROVIDER=openrouter
+export VISION_MODEL=qwen/qwen3.6-plus
+export OPENROUTER_API_KEY=sk-or-v1-...
+pip install "agentic-web-testing[openrouter-vision]"
+```
+
+**GLM via OpenRouter (~$0.08/1K images):**
+```bash
+export VISION_PROVIDER=openrouter
+export VISION_MODEL=glm-4v-plus
+export OPENROUTER_API_KEY=sk-or-v1-...
+```
+
+**Gemini Flash (free tier):**
+```bash
+export VISION_PROVIDER=google
+export VISION_MODEL=gemini-2.5-flash-lite
+export GOOGLE_API_KEY=AIza...
+pip install "agentic-web-testing[google-vision]"
+```
+
+**GPT-4o (best accuracy):**
+```bash
+export VISION_PROVIDER=openai
+export VISION_MODEL=gpt-4o
+export OPENAI_API_KEY=sk-proj-...
+pip install "agentic-web-testing[openai-vision]"
+```
+
+**Any OpenAI-compatible endpoint (vLLM, Ollama, Together, Groq, etc.):**
+```bash
+export VISION_PROVIDER=openai
+export VISION_BASE_URL=http://localhost:8000/v1
+export VISION_API_KEY=not-needed
+```
+
+Install: `pip install "agentic-web-testing[all-vision]"` to enable all providers.
+
 ## Typical Workflow
 
 ```
