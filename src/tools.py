@@ -41,7 +41,9 @@ def build_registry(browser_manager) -> ToolRegistry:
     reg.register("launch", "Launch a browser session", {
         "headless": "bool (optional, default true)",
         "viewport": "dict (optional, default 1920x1080)",
-    }, lambda p: b.launch(headless=p.get("headless", True), viewport=p.get("viewport")))
+        "record_video": "bool (optional, default false)",
+    }, lambda p: b.launch(headless=p.get("headless", True), viewport=p.get("viewport"),
+                         record_video=p.get("record_video", False)))
     reg.register("close", "Close the browser session", {}, lambda p: b.close())
     reg.register("get_info", "Get current page info (URL, title, load state)", {}, lambda p: b.get_info())
 
@@ -84,6 +86,11 @@ def build_registry(browser_manager) -> ToolRegistry:
                  {"selector": "str", "color": "str (optional)"},
                  lambda p: b.highlight_element(p["selector"], p.get("color", "#ff8800")))
     reg.register("clear_highlights", "Clear all element highlights", {}, lambda p: b.clear_highlights())
+
+    reg.register("start_video", "Start video recording of the browser session",
+                 {"path": "str (optional)"}, lambda p: b.start_video_recording(p.get("path")))
+    reg.register("stop_video", "Stop video recording and return video path",
+                 {}, lambda p: b.stop_video_recording())
 
     reg.register("get_console_logs", "Get collected console log messages", {}, lambda p: b.get_console_logs())
     reg.register("get_network_requests", "Get collected network requests",

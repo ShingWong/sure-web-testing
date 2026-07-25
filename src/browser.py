@@ -30,10 +30,12 @@ class BrowserManager:
         if not self._browser or not self._page:
             raise RuntimeError("No active session. Call launch() first.")
 
-    def launch(self, headless: bool = True, viewport: dict | None = None) -> dict:
+    def launch(self, headless: bool = True, viewport: dict | None = None,
+               record_video: bool = False) -> dict:
         try:
             self._playwright = sync_playwright().start()
             self._browser = self._playwright.chromium.launch(headless=headless)
+            self._recording = record_video
             self._context = self._browser.new_context(
                 viewport=viewport or DEFAULT_VIEWPORT,
                 record_video_dir=os.path.abspath("./recordings") if self._recording else None,
@@ -84,6 +86,26 @@ class BrowserManager:
             self._console_logs = []
             self._network_requests = []
             return {"status": "ok", "data": {"ok": True}}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+    def start_video_recording(self, path: str | None = None) -> dict:
+        try:
+            self._ensure_session()
+            self._recording = True
+            self._video_path = path
+            return {"status": "ok", "data": {"ok": True}}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+    def stop_video_recording(self) -> dict:
+        try:
+            self._ensure_session()
+            video = self._page.video
+            if video:
+                video_path = video.path()
+                return {"status": "ok", "data": {"video_path": video_path}}
+            return {"status": "error", "error": "No video recording in progress"}
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
