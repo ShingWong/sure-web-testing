@@ -1,5 +1,5 @@
 ---
-name: agentic-web-testing
+name: sure-web-testing
 description: Use when testing web applications interactively with step-by-step browser access via MCP server. Use for debugging UI issues, verifying login flows, inspecting DOM/console/network incrementally, recording demo videos, or taking highlighted screenshots. Use instead of one-shot Playwright scripts when you need to inspect state between steps.
 ---
 
@@ -100,7 +100,7 @@ All OpenAI-compatible providers (`openai`, `openrouter`) use the same base class
 export VISION_PROVIDER=openrouter
 export VISION_MODEL=qwen/qwen3.6-plus
 export OPENROUTER_API_KEY=sk-or-v1-...
-pip install "agentic-web-testing[openrouter-vision]"
+pip install "sure-web-testing[openrouter-vision]"
 ```
 
 **GLM via OpenRouter (~$0.08/1K images):**
@@ -115,7 +115,7 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 export VISION_PROVIDER=google
 export VISION_MODEL=gemini-2.5-flash-lite
 export GOOGLE_API_KEY=AIza...
-pip install "agentic-web-testing[google-vision]"
+pip install "sure-web-testing[google-vision]"
 ```
 
 **GPT-4o (best accuracy):**
@@ -123,7 +123,7 @@ pip install "agentic-web-testing[google-vision]"
 export VISION_PROVIDER=openai
 export VISION_MODEL=gpt-4o
 export OPENAI_API_KEY=sk-proj-...
-pip install "agentic-web-testing[openai-vision]"
+pip install "sure-web-testing[openai-vision]"
 ```
 
 **Any OpenAI-compatible endpoint (vLLM, Ollama, Together, Groq, etc.):**
@@ -133,7 +133,7 @@ export VISION_BASE_URL=http://localhost:8000/v1
 export VISION_API_KEY=not-needed
 ```
 
-Install: `pip install "agentic-web-testing[all-vision]"` to enable all providers.
+Install: `pip install "sure-web-testing[all-vision]"` to enable all providers.
 
 ## Typical Workflow
 

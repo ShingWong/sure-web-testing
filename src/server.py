@@ -52,7 +52,7 @@ class MCPServer:
             return {
                 "protocolVersion": "0.1",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "agentic-web-testing", "version": "0.1.0"},
+                "serverInfo": {"name": "sure-web-testing", "version": "0.1.0"},
             }
         elif method == "tools/list":
             return {"tools": self._registry.list_tools()}

@@ -125,7 +125,7 @@ def build_registry(browser_manager) -> ToolRegistry:
             missing = "google-genai" if "google" in str(e) else "openai"
             return {
                 "status": "error",
-                "error": f"Missing dependency: pip install agentic-web-testing[{missing}-vision]. Also set VISION_API_KEY env var.",
+                "error": f"Missing dependency: pip install sure-web-testing[{missing}-vision]. Also set VISION_API_KEY env var.",
             }
         except Exception as e:
             err_msg = str(e)
@@ -168,7 +168,7 @@ def build_registry(browser_manager) -> ToolRegistry:
         "Take screenshot + analyze with vision AI. Providers: google (gemini-2.5-flash-lite, free tier), "
         "openai (gpt-4o), openrouter (qwen/qwen3.6-plus ~$0.05/1K, glm-4v-plus ~$0.08/1K, or any model). "
         "Set VISION_PROVIDER, VISION_API_KEY, VISION_MODEL env vars. "
-        "Deps: pip install agentic-web-testing[google-vision|openai-vision|openrouter-vision]",
+        "Deps: pip install sure-web-testing[google-vision|openai-vision|openrouter-vision]",
         {
             "prompt": "str (optional, defaults to form verification prompt)",
             "provider": "str (optional, overrides VISION_PROVIDER env var)",

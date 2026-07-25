@@ -18,7 +18,7 @@ Configure vision analysis via environment variables. All models are accessible t
 export VISION_PROVIDER=openrouter
 export VISION_MODEL=qwen/qwen3.6-plus
 export OPENROUTER_API_KEY=sk-or-v1-...
-pip install "agentic-web-testing[openrouter-vision]"
+pip install "sure-web-testing[openrouter-vision]"
 ```
 
 ### GLM-4V-Plus (good Chinese/English)
@@ -33,7 +33,7 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 export VISION_PROVIDER=google
 export VISION_MODEL=gemini-2.5-flash-lite
 export GOOGLE_API_KEY=AIza...
-pip install "agentic-web-testing[google-vision]"
+pip install "sure-web-testing[google-vision]"
 ```
 
 ### GPT-4o (best quality)
@@ -41,7 +41,7 @@ pip install "agentic-web-testing[google-vision]"
 export VISION_PROVIDER=openai
 export VISION_MODEL=gpt-4o
 export OPENAI_API_KEY=sk-proj-...
-pip install "agentic-web-testing[openai-vision]"
+pip install "sure-web-testing[openai-vision]"
 ```
 
 ### Other OpenRouter models
