@@ -12,3 +12,4 @@ test-results/
 .venv/
 recordings/
 .superpowers/
+graphify-out/
