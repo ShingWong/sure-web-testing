@@ -17,7 +17,57 @@ def test_initialize():
     output = stdout.getvalue()
     parsed = json.loads(output)
     assert parsed["id"] == 1
-    assert parsed["result"]["protocolVersion"] == "0.1"
+    # The v1 answer was "0.1" — not an MCP protocol version; an opencode v2
+    # client negotiates properly and rejects the handshake. With no version
+    # requested the server offers its newest supported date-string version.
+    assert parsed["result"]["protocolVersion"] == "2025-06-18"
+    assert parsed["result"]["capabilities"]["tools"]["listChanged"] is False
+
+
+def test_initialize_echoes_client_version():
+    """A client asking for a version we speak gets it echoed back."""
+    reg = ToolRegistry()
+    server = MCPServer(reg)
+    stdin = io.StringIO(
+        '{"jsonrpc":"2.0","id":9,"method":"initialize",'
+        '"params":{"protocolVersion":"2024-11-05"}}\n'
+    )
+    stdout = io.StringIO()
+    server.handle_one(stdin, stdout)
+    parsed = json.loads(stdout.getvalue())
+    assert parsed["result"]["protocolVersion"] == "2024-11-05"
+
+
+def test_initialize_unknown_version_does_not_echo():
+    """The old "0.1" (or any version we do not speak) must never come back —
+    we answer with our newest supported version instead."""
+    reg = ToolRegistry()
+    server = MCPServer(reg)
+    stdin = io.StringIO(
+        '{"jsonrpc":"2.0","id":10,"method":"initialize",'
+        '"params":{"protocolVersion":"0.1"}}\n'
+    )
+    stdout = io.StringIO()
+    server.handle_one(stdin, stdout)
+    parsed = json.loads(stdout.getvalue())
+    assert parsed["result"]["protocolVersion"] == "2025-06-18"
+
+
+def test_ping():
+    """ping is a required MCP method; unknown methods stay -32601."""
+    reg = ToolRegistry()
+    server = MCPServer(reg)
+    stdin = io.StringIO('{"jsonrpc":"2.0","id":11,"method":"ping"}\n')
+    stdout = io.StringIO()
+    server.handle_one(stdin, stdout)
+    parsed = json.loads(stdout.getvalue())
+    assert parsed["result"] == {}
+
+    stdin = io.StringIO('{"jsonrpc":"2.0","id":12,"method":"resources/list"}\n')
+    stdout = io.StringIO()
+    server.handle_one(stdin, stdout)
+    parsed = json.loads(stdout.getvalue())
+    assert parsed["error"]["code"] == -32601
 
 
 def test_tools_list():

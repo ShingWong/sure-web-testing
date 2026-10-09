@@ -179,6 +179,7 @@ close()
 |---------|---------|---------|
 | `VISION_PROVIDER` | `google` | Vision AI provider |
 | `VISION_API_KEY` | — | API key (falls back to provider-specific var) |
+| `ALLOW_EVALUATE` | `false` | Permit the `evaluate` tool (arbitrary JS in the browser — local, trusted use only) |
 | `VISION_MODEL` | provider default | Model override |
 | `VISION_BASE_URL` | — | Base URL override (for OpenAI-compatible providers) |
 | `GOOGLE_API_KEY` | — | Google AI API key |
@@ -201,19 +202,42 @@ AI coding assistants (OpenCode, Claude Code, Cursor) can connect to the MCP serv
 
 Once connected, agents can launch a browser, navigate, inspect, and interact step-by-step — the browser stays alive between tool calls.
 
-### OpenCode Workflow Example
+### OpenCode v2
 
-Configure in `opencode.json`:
+opencode v2 negotiates MCP properly. The server:
+
+- answers `initialize` with a **real date-string protocol version** —
+  echoing the client's requested version when we speak it, `2025-06-18`
+  otherwise. (The v1-era answer `"0.1"` was never an MCP version; a v2
+  client rejects that handshake.)
+- exposes JSON-Schema **`inputSchema`** on every tool in `tools/list`,
+  alongside the original `params` hints for v1-era readers
+- answers **`ping`**, returns `-32601` for unknown methods, and sets
+  **`isError`** on failed `tools/call`s
+
+v1 compatibility: the wire shape is unchanged — newline-delimited
+JSON-RPC 2.0 over stdio, same methods, same `content` results — so
+older, lenient v1 clients keep working. Only a client that *required*
+the invalid `"0.1"` echo would notice, and that could not have been a
+client that also worked against the old server when it asked for
+anything else.
+
+Configure in `~/.config/opencode/opencode.jsonc` (v2 shape — note
+`mcp`, not `mcpServers`):
 
 ```json
 {
-  "mcpServers": {
-    "sure-web-testing": {
-      "command": "awt-server"
+  "mcp": {
+    "awt": {
+      "type": "local",
+      "command": ["/home/USER/.local/bin/awt-server"],
+      "enabled": true
     }
   }
 }
 ```
+
+### OpenCode Workflow Example
 
 Then prompt OpenCode with a step-by-step browser task:
 

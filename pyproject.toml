@@ -33,6 +33,14 @@ dev = [
 awt = "src.cli:main"
 awt-server = "src.server:main"
 
+[tool.setuptools]
+# The package IS `src`, rooted at the repository: every module imports its
+# siblings as `src.X` and the console scripts say `src.cli:main`. Without
+# this declaration setuptools auto-detects the src-layout and puts ROOT/src
+# on sys.path instead — `import src` then fails and both entry points die
+# with ModuleNotFoundError (seen 2026-10-09).
+packages = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
