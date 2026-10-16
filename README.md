@@ -19,6 +19,7 @@ sure-web-testing
 | **Vision provider lock-in** | Swap from Gemini to GPT-4o to Qwen by changing `VISION_PROVIDER`. No code changes, no lock-in. |
 | **Hard-to-debug test failures** | DOM inspection, console log capture, network request logging, highlighted screenshots — all available between steps. |
 | **No video recording** | Built-in `start_video` / `stop_video` — record browser sessions for demo or replay. |
+| **App not running yet** | `start_server` boots it and polls until the port accepts connections; `stop_server` reaps the whole process group on teardown. |
 
 ### How it compares
 
@@ -26,6 +27,7 @@ sure-web-testing
 |---|---|---|---|---|
 | Persistent session | ✅ Step-by-step | ❌ Script-only | ❌ Script-only | ❌ Per-test |
 | MCP server | ✅ Built-in | ❌ | ❌ | ❌ |
+| App server lifecycle | ✅ `start_server`/`stop_server` | ❌ | ❌ | ❌ |
 | Vision analysis | ✅ Provider-agnostic | ❌ | ❌ | ❌ |
 | Video recording | ✅ Built-in | ❌ | ❌ | ✅ |
 | Console/Network capture | ✅ Per-step | ❌ | ❌ | ✅ |
@@ -100,6 +102,25 @@ Agent/CLI
 | `close` | Close browser and cleanup |
 | `get_info` | Current URL, title, load state |
 
+### App Server Lifecycle
+
+The browser assumes the app under test is already serving — these four
+tools boot it, wait for readiness, and tear it down (replaces
+`webapp-testing`'s `with_server.py` for interactive sessions):
+
+| Tool | Purpose |
+|------|---------|
+| `start_server` | Run a server command; poll until its port accepts connections (30s default), return log path. On crash/timeout: stop + return log tail |
+| `stop_server` | SIGTERM the process group (SIGKILL after 5s) — reaps shell children; omit name to stop all |
+| `list_servers` | Running state, pid, port, uptime, log path |
+| `server_logs` | Tail captured stdout/stderr |
+
+Server lifetime is the MCP session: everything started is stopped on
+disconnect (`atexit` in `server.main`). For **committed, re-runnable
+test scripts** (headless batch, CI), use the `webapp-testing` skill
+instead — script generation stays there; server lifecycle exists on
+both sides.
+
 ### Navigation
 
 | Tool | Purpose |
@@ -162,8 +183,9 @@ Vision is provider-agnostic. Configure with `VISION_PROVIDER`:
 ## Typical Workflow
 
 ```
+start_server(command="npm run dev", port=5173)   # or the app is already up
 launch(headless=false)
-goto("http://localhost:6080")
+goto("http://localhost:5173")
 fill("input[name=email]", "user@example.com")
 fill("input[name=password]", "mypassword")
 click("button[type=submit]")
@@ -171,6 +193,7 @@ wait_for("text=Dashboard")
 screenshot(highlight="h1")
 get_console_logs()
 close()
+stop_server()
 ```
 
 ## Configuration
@@ -268,7 +291,8 @@ OpenCode executes each step via the MCP tools, pausing between every action so y
 | File | What it tells the agent |
 |------|------------------------|
 | `src/browser.py` | `BrowserManager` class — session lifecycle, navigation, DOM, interaction, console/network capture, video recording, element highlighting |
-| `src/tools.py` | `ToolRegistry` + `build_registry` — all 30+ MCP tools with signatures |
+| `src/tools.py` | `ToolRegistry` + `build_registry` — all 36 MCP tools with signatures (server tools registered only when a `ServerManager` is passed) |
+| `src/appserver.py` | `ServerManager` — app server start/readiness-poll/stop/log-tail; process-group teardown, `atexit` cleanup on MCP disconnect |
 | `src/vision.py` | `VisionProvider` hierarchy — Google, OpenAI, OpenRouter vision analysis |
 | `src/server.py` | `MCPServer` — JSON-RPC 2.0 protocol over stdin/stdout |
 | `src/cli.py` | Interactive REPL CLI |
@@ -297,7 +321,7 @@ git clone git@github.com:ShingWong/sure-web-testing.git
 cd sure-web-testing
 pip install -e ".[dev]"
 playwright install chromium
-pytest                              # 41 tests
+pytest                              # 55 tests
 ruff check src/ tests/
-mypy src/
+mypy src/   # browser.py has 37 pre-existing union-attr errors (Page|None baseline)
 ```
