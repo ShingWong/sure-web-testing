@@ -15,8 +15,8 @@ import sys
 import time
 
 
-PID_FILE = "/tmp/awt-server.pid"
-LOG_FILE = "/tmp/awt-server.log"
+PID_FILE = "/tmp/sure-web-testing-server.pid"
+LOG_FILE = "/tmp/sure-web-testing-server.log"
 
 
 def start():

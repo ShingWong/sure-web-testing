@@ -40,9 +40,10 @@ class ToolRegistry:
         return tool["handler"] if tool else None
 
 
-def build_registry(browser_manager) -> ToolRegistry:
+def build_registry(browser_manager, server_manager=None) -> ToolRegistry:
     reg = ToolRegistry()
     b = browser_manager
+    sm = server_manager
 
     reg.register("launch", "Launch a browser session", {
         "headless": "bool (optional, default true)",
@@ -111,6 +112,33 @@ def build_registry(browser_manager) -> ToolRegistry:
                  {"name": "str"}, lambda p: b.load_state(p["name"]))
     reg.register("list_states", "List saved browser states",
                  {}, lambda p: b.list_states())
+
+    # ── App server lifecycle tools ─────────────────────────────────
+    # The browser assumes the app under test is already serving. These four
+    # tools close that gap: boot it, wait for the port, read logs, tear down.
+    if sm is not None:
+        reg.register("start_server",
+                     "Start the application server (e.g. 'npm run dev', 'python -m http.server 8000'). "
+                     "Polls until the port accepts connections (default 30s) and returns its log path; "
+                     "on startup crash or readiness timeout it stops the process and returns the log tail. "
+                     "One server per name — stop_server before reusing a name.",
+                     {"command": "str", "port": "int (optional, readiness poll — omit if the command doesn't listen on a port)",
+                      "cwd": "str (optional, working directory)", "timeout": "int (optional, seconds, default 30)",
+                      "name": "str (optional, default server-N)"},
+                     lambda p: sm.start(p["command"], port=p.get("port"), cwd=p.get("cwd"),
+                                        timeout=p.get("timeout", 30), name=p.get("name")))
+        reg.register("stop_server",
+                     "Stop a started application server by name (or all if name omitted). "
+                     "SIGTERM the process group, SIGKILL after 5s — reaps shell children too.",
+                     {"name": "str (optional, omit to stop every started server)"},
+                     lambda p: sm.stop(p.get("name")))
+        reg.register("list_servers",
+                     "List application servers started this session: running state, pid, port, uptime, log path",
+                     {}, lambda p: sm.list_servers())
+        reg.register("server_logs",
+                     "Tail an application server's captured stdout/stderr",
+                     {"name": "str", "tail": "int (optional, lines, default 50)"},
+                     lambda p: sm.logs(p["name"], tail=p.get("tail", 50)))
 
     # ── Vision tools ──────────────────────────────────────────────
 

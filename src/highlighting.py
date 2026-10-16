@@ -13,7 +13,7 @@ HIGHLIGHT_STYLE = {
 class HighlightManager:
     def __init__(self, page):
         self._page = page
-        self._element_id = "awt-highlight"
+        self._element_id = "sure-web-testing-highlight"
 
     def highlight(self, selector: str, color: str = "#ff8800") -> dict:
         r_ch, g_ch, b_ch = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)

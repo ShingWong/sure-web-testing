@@ -4,10 +4,10 @@
 
 ```bash
 # Start the MCP server
-awt-server
+sure-web-testing-server
 
 # Or use the interactive CLI
-awt
+sure-web-testing
 ```
 
 ### Why sure-web-testing?
@@ -54,7 +54,7 @@ pip install "sure-web-testing[all-vision]"         # All providers
 **MCP Server** — no API keys needed for browser control:
 
 ```bash
-awt-server
+sure-web-testing-server
 ```
 
 **Vision analysis** — set provider and API key:
@@ -194,7 +194,7 @@ AI coding assistants (OpenCode, Claude Code, Cursor) can connect to the MCP serv
 {
   "mcpServers": {
     "sure-web-testing": {
-      "command": "awt-server"
+      "command": "sure-web-testing-server"
     }
   }
 }
@@ -228,9 +228,9 @@ Configure in `~/.config/opencode/opencode.jsonc` (v2 shape — note
 ```json
 {
   "mcp": {
-    "awt": {
+    "sure-web-testing": {
       "type": "local",
-      "command": ["/home/USER/.local/bin/awt-server"],
+      "command": ["/home/USER/.local/bin/sure-web-testing-server"],
       "enabled": true
     }
   }

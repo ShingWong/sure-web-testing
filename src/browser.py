@@ -257,7 +257,7 @@ class BrowserManager:
             self._ensure_session()
             if highlight:
                 self._highlight_element(highlight, highlight_color or "#ff8800")
-            path = path or os.path.join(tempfile.gettempdir(), f"awt_{uuid4().hex}.png")
+            path = path or os.path.join(tempfile.gettempdir(), f"sure-web-testing-{uuid4().hex}.png")
             self._page.screenshot(path=path, full_page=full_page)
             with open(path, "rb") as f:
                 data = base64.b64encode(f.read()).decode("utf-8")
@@ -277,10 +277,10 @@ class BrowserManager:
             const el = document.querySelector({_json.dumps(selector)});
             if (!el) return;
             const rect = el.getBoundingClientRect();
-            let f = document.getElementById('awt-highlight');
+            let f = document.getElementById('sure-web-testing-highlight');
             if (!f) {{
                 f = document.createElement('div');
-                f.id = 'awt-highlight';
+                f.id = 'sure-web-testing-highlight';
                 document.body.appendChild(f);
             }}
             f.style.cssText = 'position:fixed;left:' + rect.x + 'px;top:' + rect.y + 'px;' +
@@ -293,7 +293,7 @@ class BrowserManager:
         self._page.evaluate(js)
 
     def _clear_highlights(self):
-        self._page.evaluate("(()=>{let o=document.getElementById('awt-highlight');if(o)o.remove();})()")
+        self._page.evaluate("(()=>{let o=document.getElementById('sure-web-testing-highlight');if(o)o.remove();})()")
 
     def highlight_element(self, selector: str, color: str = "#ff8800") -> dict:
         try:
@@ -355,7 +355,7 @@ class BrowserManager:
     def save_state(self, name: str) -> dict:
         try:
             self._ensure_session()
-            state_path = os.path.join(tempfile.gettempdir(), f"awt_state_{name}.json")
+            state_path = os.path.join(tempfile.gettempdir(), f"sure-web-testing-state_{name}.json")
             self._context.storage_state(path=state_path)
             self._states[name] = state_path
             return {"status": "ok", "data": {"ok": True}}

@@ -86,7 +86,7 @@ class MCPServer:
             return {
                 "protocolVersion": version,
                 "capabilities": {"tools": {"listChanged": False}},
-                "serverInfo": {"name": "sure-web-testing", "version": "0.1.0"},
+                "serverInfo": {"name": "sure-web-testing", "version": "0.2.0"},
             }
         elif method == "ping":
             return {}
@@ -133,11 +133,18 @@ class MCPServer:
 
 
 def main():
+    import atexit
+
+    from src.appserver import ServerManager
     from src.browser import BrowserManager
     from src.tools import build_registry
 
     browser = BrowserManager()
-    registry = build_registry(browser)
+    servers = ServerManager()
+    # App servers outlive a single tool call — guarantee teardown when the
+    # MCP connection drops (opencode restart, session end, stdin EOF).
+    atexit.register(servers.stop_all)
+    registry = build_registry(browser, servers)
     server = MCPServer(registry)
     server.run()
 

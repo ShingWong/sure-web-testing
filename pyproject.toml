@@ -1,6 +1,6 @@
 [project]
 name = "sure-web-testing"
-version = "0.1.0"
+version = "0.2.0"
 description = "Persistent, step-by-step interactive browser testing with MCP server and CLI"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -30,8 +30,8 @@ dev = [
 ]
 
 [project.scripts]
-awt = "src.cli:main"
-awt-server = "src.server:main"
+sure-web-testing = "src.cli:main"
+sure-web-testing-server = "src.server:main"
 
 [tool.setuptools]
 # The package IS `src`, rooted at the repository: every module imports its

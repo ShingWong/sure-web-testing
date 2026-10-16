@@ -28,7 +28,7 @@ def format_result(result: dict) -> str:
 
 def main():
     mgr = BrowserManager()
-    print("Agentic Web Testing CLI")
+    print("sure-web-testing CLI")
     print("Type 'help' for commands, 'quit' to exit.")
 
     commands = {
@@ -50,7 +50,7 @@ def main():
 
     while True:
         try:
-            line = input("awt> ").strip()
+            line = input("sure-web-testing> ").strip()
         except (EOFError, KeyboardInterrupt):
             print()
             break

@@ -3,7 +3,7 @@ name: sure-web-testing
 description: Use when testing web applications interactively with step-by-step browser access via MCP server. Use for debugging UI issues, verifying login flows, inspecting DOM/console/network incrementally, recording demo videos, or taking highlighted screenshots. Use instead of one-shot Playwright scripts when you need to inspect state between steps.
 ---
 
-# Agentic Web Testing
+# sure-web-testing
 
 ## Overview
 
@@ -13,10 +13,10 @@ Step-by-step interactive browser testing via MCP server. Launch a persistent Pla
 
 ```bash
 # Start the MCP server (installed console script — works from any directory)
-awt-server
+sure-web-testing-server
 
 # Or use the interactive CLI
-awt
+sure-web-testing
 ```
 
 (`python -m src.server` / `python -m src.cli` also work when run from this
@@ -36,6 +36,24 @@ Agent/CLI ↔ stdin/stdout JSON-RPC 2.0 ↔ MCP Server ↔ Playwright ↔ Chromi
 | `launch` | Start browser session |
 | `close` | Close browser and cleanup |
 | `get_info` | Current URL, title, load state |
+
+### App Server Lifecycle
+The browser assumes the app under test is already serving — these four
+tools boot it, wait for readiness, and tear it down (replaces
+`webapp-testing`'s `with_server.py` for interactive sessions):
+
+| Tool | Purpose |
+|------|---------|
+| `start_server` | Run a server command; poll until its port accepts connections (30s default), return log path. On crash/timeout: stop + return log tail |
+| `stop_server` | SIGTERM the process group (SIGKILL after 5s) — reaps shell children; omit name to stop all |
+| `list_servers` | Running state, pid, port, uptime, log path |
+| `server_logs` | Tail captured stdout/stderr |
+
+> **Boundary with `webapp-testing`:** this skill is *interactive sessions*
+> (persistent browser, inspect between steps, vision analysis). For
+> **committed, re-runnable test scripts** (headless batch, CI, `file://`
+> static HTML) use the `webapp-testing` skill instead — script generation
+> stays there; server lifecycle now exists on both sides.
 
 ### Navigation
 | Tool | Purpose |
@@ -141,8 +159,9 @@ Install: `pip install "sure-web-testing[all-vision]"` to enable all providers.
 ## Typical Workflow
 
 ```
+start_server(command="npm run dev", port=5173)   # or the app is already up
 launch(headless=false)
-goto("http://localhost:6080")
+goto("http://localhost:5173")
 fill("input[name=email]", "user@example.com")
 fill("input[name=password]", "mypassword")
 click("button[type=submit]")
@@ -150,6 +169,7 @@ wait_for("text=Dashboard")
 screenshot(highlight="h1")
 get_console_logs()
 close()
+stop_server()
 ```
 
 ## Development
