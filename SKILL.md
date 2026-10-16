@@ -12,12 +12,15 @@ Step-by-step interactive browser testing via MCP server. Launch a persistent Pla
 ## Quick Start
 
 ```bash
-# Start the MCP server
-python -m src.server
+# Start the MCP server (installed console script — works from any directory)
+awt-server
 
 # Or use the interactive CLI
-python -m src.cli
+awt
 ```
+
+(`python -m src.server` / `python -m src.cli` also work when run from this
+repository's root.)
 
 ## Architecture
 
